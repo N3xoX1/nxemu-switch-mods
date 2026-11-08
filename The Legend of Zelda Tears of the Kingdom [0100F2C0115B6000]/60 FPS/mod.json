@@ -1,0 +1,33 @@
+{
+    "name": "60 FPS",
+    "description": "Runs the game at 60 fps at the right speed.",
+    "game_versions": ["1.0.0", "1.2.1", "1.4.3"],
+    "enabled_by_default": true,
+    "requires": ["frame_step"],
+    "license": "MIT",
+    "credits": [
+        {
+            "name": "Valiantsin Dzerakh",
+            "work": "totk-pc-recomp recomp/patches-v121.txt and patches-v143.txt: the 1.2.1 and 1.4.3 patch sets and sites, and the equipment-switch fix",
+            "url": "https://github.com/valentderah/totk-pc-recomp",
+            "license": "MIT"
+        },
+        {
+            "name": "MacNativeGames contributors",
+            "work": "games/totk/runtime/game_patches.c: the 1.0.0 patch sets and sites; game_patches_v143.c, which totk-pc-recomp ported",
+            "url": "https://github.com/ly05010419/MacNativeGames",
+            "license": "MIT"
+        },
+        {
+            "name": "JieML1100",
+            "work": "found and traced the equipment-switch cooldown (totk-pc-recomp issue #18)",
+            "url": "https://github.com/valentderah/totk-pc-recomp/issues/18",
+            "license": "MIT"
+        },
+        {
+            "name": "N3xoX1",
+            "work": "NXEmu patch-set port; the 1.0.0 equipment-switch site",
+            "license": "MIT"
+        }
+    ]
+}
