@@ -2,7 +2,7 @@
     "name": "60 FPS",
     "description": "Runs the game at 60 fps at the right speed.",
     "game_versions": ["1.0.0", "1.2.1", "1.4.3"],
-    "enabled_by_default": true,
+    "enabled_by_default": false,
     "requires": ["frame_step"],
     "license": "MIT",
     "credits": [
