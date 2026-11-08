@@ -6,7 +6,8 @@
 # 1.0.0 offsets they are. The equipment-switch fix follows totk-pc-recomp's 1.2.1 and 1.4.3 one (issue #18, found by
 # JieML1100; MIT, Copyright (c) 2026 Valiantsin Dzerakh), located again in 1.0.0. 1.0.0 has no fades fix.
 # The patch page holds the frame step NXEmu writes at every present: +0 the 30 Hz ratio (seconds * 30), +4 the step
-# in seconds. The fps60 set lets the game run at 60 fps.
+# in seconds, +12 1 while a video plays. The fps60 set lets the game run at 60 fps, and at its own rate while a
+# video plays; it is changed from upstream for that.
 
 @nsobid-082CE09B06E33A123CB1E2770F5F9147709033DB
 @version 1.0.0
@@ -16,13 +17,14 @@ set realtime TOTK_REALTIME       1
 set cloth    TOTK_CLOTH_REALTIME 1
 set bounce   TOTK_HIGHFPS_FIX    1
 
-# 60 fps: the adaptive present-interval controller (main+0x8f6bec) gets the minimum interval 1.
-site fps60 main 8f6c60 6b08015f 7100055f   # clamp: cmp w10, #1 (was cmp w10, w8 = minimum)
-site fps60 main 8f6c64 1a89b10a 1a9fa52a   # clamp: csinc w10, w9, wzr, ge (desired = max(desired, 1))
-site fps60 main 8f6c88 b9401a8a d503201f   # lower trigger: nop the stored-candidate load
-site fps60 main 8f6d18 6b08015f 7100055f   # raise path: cmp w10, #1
-site fps60 main 8f6d28 1a88c1ac 1a9fc5ac   # raise path: csinc w12, w13, wzr, gt (next lower candidate floors at 1)
-site fps60 main 8f6d7c b9400288 52800028   # lower path: mov w8, #1 (minimum interval 1)
+# 60 fps: the adaptive present-interval controller (main+0x8f6bec) uses the minimum interval 1, except while a video
+# plays (patch page +12): the game shows one frame of its 30 fps movies per game frame, so a pre-rendered cutscene plays
+# at its speed only at the frame rate the game was made for. The game's minimum at +0 (2: 30 fps) is replaced where it
+# is loaded, so the rest of the controller runs as the game wrote it. The flags each cave sets are set again by the
+# next compare.
+site fps60 main 8f6c48 29402e88 @page:x8 b9400d08 7100011f 29402e88 1a9f1508   # ldp w8, w11, [x20]: w8 = video ? minimum : 1
+site fps60 main 8f6c88 b9401a8a @page:x11 b9400d6b 7100017f b9401a8b 1a8a116a   # ldr w10, [x20, #24]: the stored candidate only while a video plays, else the desired interval (w11 is free)
+site fps60 main 8f6d7c b9400288 @page:x8 b9400d08 7100011f b9400288 1a9f1508   # ldr w8, [x20]: w8 = video ? minimum : 1
 site fps60 main 8f6d98 2a0a03f5 1a9fa555   # lower path: csinc w21, w10, wzr, ge (result never below 1)
 
 # Real-time step. The frame-step function (main+0x7a83e4) turns the present interval w1 into {ratio = interval * 0.5,

@@ -6,7 +6,8 @@
 # games/totk/runtime/game_patches_v143.c (MIT, Copyright (c) 2026 MacNativeGames contributors). Only the sets that
 # read the frame step are kept: output, scene, shadow, cascade, aspect, fov and zstd need the port's own runtime.
 # The patch page holds the frame step NXEmu writes at every present: +0 the 30 Hz ratio (seconds * 30), +4 the
-# step in seconds, +8 the step in 60 Hz ticks. The fps60 set lets the game run at 60 fps.
+# step in seconds, +8 the step in 60 Hz ticks, +12 1 while a video plays. The fps60 set lets the game run at 60 fps,
+# and at its own rate while a video plays; it is changed from upstream for that.
 
 @nsobid-277178B7DBA1B6D4949A84778D4ABC58B31B34F5
 @version 1.4.3
@@ -16,13 +17,14 @@ set realtime TOTK_REALTIME       1
 set cloth    TOTK_CLOTH_REALTIME 1
 set bounce   TOTK_HIGHFPS_FIX    1
 
-# 60 fps: the adaptive present-interval controller (main+0x2db174, 1.2.1 0x8f26c8) gets the minimum interval 1.
-site fps60 main 2db204 6b08015f 7100055f   # clamp: cmp w10, #1 (was cmp w10, w8 = minimum)
-site fps60 main 2db208 1a89b10a 1a9fa52a   # clamp: csinc w10, w9, wzr, ge (desired = max(desired, 1))
-site fps60 main 2db22c b940468a d503201f   # lower trigger: nop the stored-candidate load
-site fps60 main 2db360 6b0801bf 710005bf   # raise path: cmp w13, #1
-site fps60 main 2db36c 1a88c1ac 1a9fc5ac   # raise path: csinc w12, w13, wzr, gt (next lower candidate floors at 1)
-site fps60 main 2db340 b9400288 52800028   # lower path: mov w8, #1 (minimum interval 1)
+# 60 fps: the adaptive present-interval controller (main+0x2db174, 1.2.1 0x8f26c8) uses the minimum interval 1,
+# except while a video plays (patch page +12): the game shows one frame of its 30 fps movies per game frame, so a
+# pre-rendered cutscene plays at its speed only at the frame rate the game was made for. The game's minimum at +0 (2:
+# 30 fps) is replaced where it is loaded, so the rest of the controller runs as the game wrote it. The flags each cave
+# sets are set again by the next compare.
+site fps60 main 2db1d0 29402e88 @page:x8 b9400d08 7100011f 29402e88 1a9f1508   # ldp w8, w11, [x20]: w8 = video ? minimum : 1
+site fps60 main 2db22c b940468a @page:x11 b9400d6b 7100017f b940468b 1a8a116a   # ldr w10, [x20, #68]: the stored candidate only while a video plays, else the desired interval (w11 is free)
+site fps60 main 2db340 b9400288 @page:x8 b9400d08 7100011f b9400288 1a9f1508   # ldr w8, [x20]: w8 = video ? minimum : 1
 site fps60 main 2db34c 2a0a03f5 1a9fa555   # lower path: csinc w21, w10, wzr, ge (result never below 1)
 
 # Real-time step. The frame-step producer feeds both FrameRateMgr call sites with s8 = nominal interval * a 0.5/1.0
