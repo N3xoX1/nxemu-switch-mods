@@ -20,7 +20,7 @@ ALLOWED = {
     "cheats": {".txt"},
 }
 TEXT_PATCHES = {".nxpatch", ".pchtxt"}
-FEATURES = {"frame_step"}
+FEATURES = {"frame_step", "gpu_list_counts"}
 LICENSE_FILE = re.compile(r"^LICENSE(\.(md|txt))?$")
 
 errors = []

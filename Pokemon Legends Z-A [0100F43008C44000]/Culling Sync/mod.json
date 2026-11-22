@@ -1,0 +1,15 @@
+{
+    "name": "Culling Sync",
+    "description": "Stops the train-station roof and other objects vanishing: the game waits for the GPU before it refills its culling job list.",
+    "game_versions": ["1.0.0", "2.0.2"],
+    "enabled_by_default": true,
+    "requires": ["gpu_list_counts"],
+    "license": "MIT",
+    "credits": [
+        {
+            "name": "N3xoX1",
+            "work": "found the torn culling job list; the 1.0.0 and 2.0.2 patch sets",
+            "license": "MIT"
+        }
+    ]
+}

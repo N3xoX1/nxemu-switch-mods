@@ -41,6 +41,7 @@ Code patches and cheats for Nintendo Switch games. Set up so NXEmu can ship them
 - `enabled_by_default`: `false` keeps the mod off until the user turns it on.
 - `requires`: NXEmu features the mod needs; a build without one keeps the mod off.
   `frame_step`: NXEmu writes the measured frame time to the patch page (`.nxpatch` `@page`).
+  `gpu_list_counts`: NXEmu counts the GPU command lists finished and submitted on the patch page.
 - `license`: the license the mod's authors gave it, with its text and copyright lines in the mod's `LICENSE`, or
   `null` when they gave none.
 - `permission`: needed when `license` is `null`: who allowed the mod to be here, and when.
