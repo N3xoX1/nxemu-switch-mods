@@ -1,0 +1,18 @@
+# Pokémon Legends: Z-A [0100F43008C44000] 1.0.0 - Culling Sync
+# Stops the train-station roof, and other draws the GPU culls, from vanishing.
+# NXEmu patch sets (nxemu-loader core/file_sys/patch_sets.h).
+# Each frame the game fills the GPU's culling job list on the CPU, in one of two slots picked by frame number, without
+# waiting for the GPU. The console's GPU reads the list within a few ms; an emulator's GPU can read it while the game
+# already refills that slot two frames on. A torn list leaves a batch unfinished for good, and its draws vanish.
+# The writer (main+0x16d7f80) now waits, before it fetches its slot, until the GPU has finished every command list
+# submitted so far: the patch page holds +16 the lists finished and +20 the lists submitted. It sleeps 100 us while
+# some are in flight.
+
+@nsobid-7222E13ECF6ADB3249B5DD5C57FA40B102245FCE
+@version 1.0.0
+
+set sync ZA_CULLING_SYNC 1
+
+# mov w1, wzr before the slot fetch (bl main+0x16ccfb8): x0, x8 to x11 are free here (x0 = x20 follows).
+# ldp finished, submitted; sleep if finished - submitted < 0; check again; replay the mov; loop while in flight.
+site sync main 16d7fb0 2a1f03e1 @page:x8 29422909 6b0a0129 d290d40b f2a0002b 9a9fb160 d4000161 29422909 6b0a0129 2a1f03e1 5400000b
